@@ -1,6 +1,9 @@
 # import modules from subfolders and benchmarking.py
-from benchmarking import *
 import classes
+from benchmarking import *
+from geneticAlgorithm import *
+from particleSwarmOptimisation import *
+from antColonyOptimisation import *
 
 # read data
 
@@ -25,16 +28,20 @@ E4,15,7,BC
 E5,9,5,AC
 """
 
+tasks = []  # list of tasks
+employees = []  # list of employees
+
 for line in taskdata.strip().split("\n"):
     ID, estTime, difficulty, deadline, requiredSkill = line.split(",")
     task = classes.task(ID, int(estTime), int(difficulty), int(deadline), requiredSkill)
-    print(task)
+    tasks.append(task)  # add task to the list
 
 for line in employeeData.strip().split("\n"):
     ID, availableHours, skillLevel, skills = line.split(",")
-    employee = classes.employee(ID, int(availableHours), int(skillLevel), skills.split(","))
-    # split skills into individual letters in a matrix
-    print(employee)
+    employee = classes.employee(ID, int(availableHours), int(skillLevel), list(skills))
+    employees.append(employee)  # add employee to the list
+
+print(employees[1].skills)
 
 # benchmarking functions
 
