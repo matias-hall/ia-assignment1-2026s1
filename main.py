@@ -1,9 +1,13 @@
 # import modules from subfolders and benchmarking.py
 import classes
-from benchmarking import *
-from geneticAlgorithm import *
-from particleSwarmOptimisation import *
-from antColonyOptimisation import *
+import functions
+import random
+import benchmarking
+import geneticAlgorithm.geneticAlgorithm as gA
+import particleSwarmOptimisation.particleSwarmOptimisation as pSO
+import antColonyOptimisation.antColonyOptimisation as aCO
+
+random.seed(2009)
 
 # read data
 
@@ -41,8 +45,12 @@ for line in employeeData.strip().split("\n"):
     employee = classes.employee(ID, int(availableHours), int(skillLevel), list(skills))
     employees.append(employee)  # add employee to the list
 
-print(employees[1].skills)
-
 # benchmarking functions
 
 # run algorithms
+
+N = 5
+
+# start benchmark
+gA.geneticAlgorithm(tasks, employees, N)
+# stop benchmark
