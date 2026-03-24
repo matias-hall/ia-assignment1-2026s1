@@ -6,38 +6,56 @@ random.seed(2009)
 # generate N candidate solutions
 def geneticAlgorithm(tasks, employees, N):
 
-    pairings = [[] for _ in range(N)]
+    candidates = [[] for _ in range(N)]
 
-    #! assign each person no more than 4 tasks?
 
     for n in range(N):
-        order = ["T1","T2","T3","T4","T5","T6","T7","T8","T9","T10"]
+        tasksN = tasks.copy()
+        random.shuffle(tasksN)
 
-        random.shuffle(order)
+        for employee in employees:
+            employee.remainingHours = employee.availableHours
 
-                #for each task, assign a random employee up to a maximum for 4 tasks per employee
+            
         employeeTaskCounts = {employee.ID: 0 for employee in employees}
-        for task in order:
-            availableEmployees = [employee for employee in employees if employeeTaskCounts[employee.ID] < 4]
+        for task in tasksN:
+            availableEmployees = [employee for employee in employees if employeeTaskCounts[employee.ID] < 4 and task.requiredSkill in employee.skills and employee.remainingHours >= task.estTime and employee.skillLevel >= task.difficulty]
+            
+            #! add sorting based on processing/deadline time?
+
             if availableEmployees:
                 assignedEmployee = random.choice(availableEmployees)
                 employeeTaskCounts[assignedEmployee.ID] += 1
 
+                assignedEmployee.remainingHours -= task.estTime
+            
+                candidates[n].append((task, assignedEmployee))
+                #print(candidates[n][len(candidates[n])-1])
+                #print(assignedEmployee.remainingHours)
+
+                
+            else:
+                print(f"No available employee for task {task.ID}")
+
             #save this data?
-            pairings[n].append((task, assignedEmployee.ID))
+
+    for n in range(N - 1, -1, -1):
+        if len(candidates[n]) < len(tasks):
+            #print(f"Candidate {n} is invalid: not all tasks assigned")
+            candidates.pop(n)
+        else:
+            print(f"Candidate {n} is valid")
+            #print(candidates[n])
 
 
-        # convert pairings to task and employee objects for evaluation
-        pairings[n] = [(next(task for task in tasks if task.ID == taskID), next(employee for employee in employees if employee.ID == empID)) for taskID, empID in pairings[n]]
+    
+    
+    
 
-        # test the validity of the pairings and calculate penalties for any constraint violations
-        for pair in range(len(pairings[n])):
-            print(pairings[n][pair])
-
-        #! use skill matching
+        
                 
 
-    return pairings
+    return candidates
 
 # represent each solution as a vector where each element indicates the employee assigned to a specific task
 

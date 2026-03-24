@@ -42,14 +42,14 @@ for line in taskdata.strip().split("\n"):
 
 for line in employeeData.strip().split("\n"):
     ID, availableHours, skillLevel, skills = line.split(",")
-    employee = classes.employee(ID, int(availableHours), int(skillLevel), list(skills))
+    employee = classes.employee(ID, int(availableHours), int(availableHours), int(skillLevel), list(skills))  # setting remainingHours to availableHours
     employees.append(employee)  # add employee to the list
 
 # benchmarking functions
 
 # run algorithms
 
-N = 5
+N = 8
 
 # start benchmark
 gA.geneticAlgorithm(tasks, employees, N)
