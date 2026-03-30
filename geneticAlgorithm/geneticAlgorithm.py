@@ -3,8 +3,12 @@ import random
 
 random.seed(2009)
 
-# generate N candidate solutions
 def geneticAlgorithm(tasks, employees, N):
+    candidates = generateCandidates(tasks, employees, N)
+    #! add crossover and mutation functions here to evolve the candidate solutions
+
+# generate N candidate solutions
+def generateCandidates(tasks, employees, N):
 
     candidates = [[] for _ in range(N)]
 
@@ -28,11 +32,15 @@ def geneticAlgorithm(tasks, employees, N):
                 employeeTaskCounts[assignedEmployee.ID] += 1
 
                 assignedEmployee.remainingHours -= task.estTime
-            
-                candidates[n].append((task, assignedEmployee))
+                remainingHours = assignedEmployee.remainingHours
 
+            
+                candidates[n].append((task, assignedEmployee, remainingHours))
+
+            """
             else:
                 print(f"No available employee for task {task.ID}")
+            """
 
     for n in range(N - 1, -1, -1):
         if len(candidates[n]) < len(tasks):
@@ -44,15 +52,12 @@ def geneticAlgorithm(tasks, employees, N):
 
     #checkConstraints(candidates, employees) # verifying the constraints of the generated candidates
 
-    
-    for n in range(len(candidates)):
-        print(candidates[n])
-        print(deadlinePenalty(candidates[n]))
-    
-    
-    
 
-        
+    for candidate in range(len(candidates)):
+        candidates[candidate].append(deadlinePenalty(candidates[candidate]))  # appending the deadline penalty to each candidate
+
+    printPairs(candidates)
+
                 
 
     return candidates
@@ -79,9 +84,17 @@ def checkConstraints(candidates, employees):
 
 def deadlinePenalty(candidate):
     deadlinePenalty = 0
-    for task, employee in candidate:
-        if (employee.availableHours - employee.remainingHours) > task.deadline:
-            print(f"Deadline violation: Task {task.ID} is overdue")
-            deadlinePenalty += (employee.availableHours - employee.remainingHours) + task.estTime - task.deadline
+    for task, employee, remainingHours in candidate:
+        if (employee.availableHours - remainingHours) > task.deadline:
+            #print(f"Deadline violation: Task {task.ID} is overdue")
+            deadlinePenalty += (employee.availableHours - remainingHours) - task.deadline
+            #print(f"{employee.ID} has worked {employee.availableHours - remainingHours} hours on task {task.ID}, which exceeds the deadline of {task.deadline} hours")
+    #print(deadlinePenalty)
 
     return deadlinePenalty
+
+def printPairs(candidates):
+    for n in range(len(candidates)):
+        print(f"Candidate {n}:")
+        for pair in range(len(candidates[n])):
+            print(candidates[n][pair])
