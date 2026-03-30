@@ -49,7 +49,7 @@ for line in employeeData.strip().split("\n"):
 
 # run algorithms
 
-N = 8
+N = 20
 
 # start benchmark
 gA.geneticAlgorithm(tasks, employees, N)

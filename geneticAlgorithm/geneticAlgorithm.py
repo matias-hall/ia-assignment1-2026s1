@@ -30,14 +30,9 @@ def geneticAlgorithm(tasks, employees, N):
                 assignedEmployee.remainingHours -= task.estTime
             
                 candidates[n].append((task, assignedEmployee))
-                #print(candidates[n][len(candidates[n])-1])
-                #print(assignedEmployee.remainingHours)
 
-                
             else:
                 print(f"No available employee for task {task.ID}")
-
-            #save this data?
 
     for n in range(N - 1, -1, -1):
         if len(candidates[n]) < len(tasks):
@@ -45,9 +40,14 @@ def geneticAlgorithm(tasks, employees, N):
             candidates.pop(n)
         else:
             print(f"Candidate {n} is valid")
-            #print(candidates[n])
 
 
+    #checkConstraints(candidates, employees) # verifying the constraints of the generated candidates
+
+    
+    for n in range(len(candidates)):
+        print(candidates[n])
+        print(deadlinePenalty(candidates[n]))
     
     
     
@@ -62,3 +62,26 @@ def geneticAlgorithm(tasks, employees, N):
 # use crossover and mutation to evolve the solution population
 
 # evaluate solutions based on penalties for any constraint violations
+
+def checkConstraints(candidates, employees):
+    for n in range(len(candidates)):
+        employeeTime = {employee.ID: 0 for employee in employees}
+        for pair in range(len(candidates[n])):
+            if candidates[n][pair][1] is not None:
+                assignedEmployee = candidates[n][pair][1]
+                employeeTime[assignedEmployee.ID] += candidates[n][pair][0].estTime
+
+        for employeeID, totalTime in employeeTime.items():
+            if totalTime > next(employee.availableHours for employee in employees if employee.ID == employeeID):
+                print(f"Constraint violation: Employee {employeeID} is overbooked with {totalTime} hours")
+            else:
+                print(f"Employee {employeeID} is within capacity with {totalTime} hours")
+
+def deadlinePenalty(candidate):
+    deadlinePenalty = 0
+    for task, employee in candidate:
+        if (employee.availableHours - employee.remainingHours) > task.deadline:
+            print(f"Deadline violation: Task {task.ID} is overdue")
+            deadlinePenalty += (employee.availableHours - employee.remainingHours) + task.estTime - task.deadline
+
+    return deadlinePenalty
