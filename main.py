@@ -53,4 +53,8 @@ N = 20
 
 # start benchmark
 gA.geneticAlgorithm(tasks, employees, N)
+
+result, score = pSO.particle_swarm_optimisation(tasks, employees)
+print(f"{result} ({score})")
+
 # stop benchmark
