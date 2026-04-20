@@ -5,7 +5,33 @@ random.seed(2009)
 
 def geneticAlgorithm(tasks, employees, N):
     candidates = generateCandidates(tasks, employees, N)
+
+    for candidate in candidates:
+        sortedCandidate = sorted(candidate[:-1], key=lambda x: x[0].ID)
+        sortedCandidate.append(candidate[-1])  # append the deadline penalty at the end of the sorted candidate
+
+    #! make T10 the second last element
+        sortedCandidate.insert(-1, sortedCandidate.pop(sortedCandidate.index(next(pair for pair in sortedCandidate if pair[0].ID == "T10"))))  # move T10 to the
+
+    print(sortedCandidate)  # sort tasks by ID, excluding the last element which is the deadline penalty
+
+    solutionMatrix = []
+    
+    for task, employee, remainingHours in sortedCandidate[:-1]:  # exclude the deadline penalty at the end
+        print(employee.ID[1:])
+        ID = int(employee.ID[1:])
+        solutionMatrix.append(ID)
+    
+    print(solutionMatrix)
+
+
     #! add crossover and mutation functions here to evolve the candidate solutions
+
+def crossover(parent1, parent2):
+    pass
+
+def mutation(candidate):
+    pass
 
 # generate N candidate solutions
 def generateCandidates(tasks, employees, N):
