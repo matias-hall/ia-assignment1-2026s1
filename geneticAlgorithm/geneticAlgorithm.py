@@ -6,6 +6,43 @@ random.seed(2009)
 def geneticAlgorithm(tasks, employees, N):
     candidates = generateCandidates(tasks, employees, N)
 
+    totalFitness = computeTotalFitness(candidates)
+    
+    generation = 0
+    terminationCondition = False
+    maxGenerations = 100
+    mutationRate = 0.01
+
+    while generation <= maxGenerations and terminationCondition == False:
+        newPopulation = []
+        while len(newPopulation) < len(candidates):
+            parent1 = selectParent(candidates, totalFitness)
+            parent2 = selectParent(candidates, totalFitness)
+            if (random.random() < crossoverRate):  # crossover probability
+                offspring1, offspring2 = crossover(parent1, parent2)
+            else:
+                offspring1, offspring2 = parent1, parent2  # no crossover, offspring are copies of parents
+            offspring1 = mutate(offspring1, mutationRate)
+            offspring2 = mutate(offspring2, mutationRate)
+
+            offspring1 = EvaluateFitness(offspring1)
+            offspring2 = EvaluateFitness(offspring2)
+
+            newPopulation.append(offspring1)
+            newPopulation.append(offspring2)
+
+        candidates = newPopulation
+        generation += 1
+    
+    bestCandidate = GetBestIndividual(candidates)
+    return bestCandidate
+
+
+
+
+
+    """
+
     for candidate in candidates:
         sortedCandidate = sorted(candidate[:-1], key=lambda x: x[0].ID)
         sortedCandidate.append(candidate[-1])  # append the deadline penalty at the end of the sorted candidate
@@ -24,14 +61,32 @@ def geneticAlgorithm(tasks, employees, N):
     
     print(solutionMatrix)
 
+    """
 
     #! add crossover and mutation functions here to evolve the candidate solutions
 
 def crossover(parent1, parent2):
     pass
 
-def mutation(candidate):
+def mutate(candidate, mutationRate):
+    for i in range(len(candidate) - 1):  # exclude the last element which is the deadline penalty
+        if random.random() < mutationRate:
+            
     pass
+
+def computeTotalFitness(candidates):
+    totalFitness = 0
+    for candidate in candidates:
+        totalFitness += candidate[10]
+    return totalFitness
+
+def selectParent(candidates, totalFitness):
+    pick = random.uniform(0, totalFitness)
+    current = 0
+    for candidate in candidates:
+        current += candidate[10]
+        if current > pick:
+            return candidate
 
 # generate N candidate solutions
 def generateCandidates(tasks, employees, N):
@@ -82,17 +137,11 @@ def generateCandidates(tasks, employees, N):
     for candidate in range(len(candidates)):
         candidates[candidate].append(deadlinePenalty(candidates[candidate]))  # appending the deadline penalty to each candidate
 
-    printPairs(candidates)
+    #printPairs(candidates)
 
                 
 
     return candidates
-
-# represent each solution as a vector where each element indicates the employee assigned to a specific task
-
-# use crossover and mutation to evolve the solution population
-
-# evaluate solutions based on penalties for any constraint violations
 
 def checkConstraints(candidates, employees):
     for n in range(len(candidates)):
