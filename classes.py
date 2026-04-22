@@ -12,12 +12,11 @@ class task:
 
 #employee class
 class employee:
-    def __init__(self, ID: str, availableHours: int, remainingHours: int, skillLevel: int, skills: list = []):
+    def __init__(self, ID: str, availableHours: int, skillLevel: int, skills: list = []):
         self.ID = ID
         self.availableHours = availableHours
-        self.remainingHours = remainingHours
         self.skillLevel = skillLevel
         self.skills = skills
 
     def __repr__(self):
-        return f"employee(ID={self.ID}, availableHours={self.availableHours}, remainingHours={self.remainingHours}, skillLevel={self.skillLevel}, skills={self.skills})"
+        return f"employee(ID={self.ID}, availableHours={self.availableHours}, skillLevel={self.skillLevel}, skills={self.skills})"

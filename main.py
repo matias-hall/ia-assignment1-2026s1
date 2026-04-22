@@ -42,17 +42,18 @@ for line in taskdata.strip().split("\n"):
 
 for line in employeeData.strip().split("\n"):
     ID, availableHours, skillLevel, skills = line.split(",")
-    employee = classes.employee(ID, int(availableHours), int(availableHours), int(skillLevel), list(skills))  # setting remainingHours to availableHours
+    employee = classes.employee(ID, int(availableHours), int(skillLevel), list(skills))  # setting remainingHours to availableHours
     employees.append(employee)  # add employee to the list
 
 # benchmarking functions
 
 # run algorithms
 
-N = 20
+N = 5
 
 # start benchmark
 gA.geneticAlgorithm(tasks, employees, N)
+# stop benchmark
 
 result, score = pSO.particle_swarm_optimisation(tasks, employees)
 print(f"{result} ({score})")
