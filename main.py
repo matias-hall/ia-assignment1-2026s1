@@ -4,9 +4,11 @@ import functions
 import random
 import benchmarking
 import geneticAlgorithm.geneticAlgorithm as gA
-# import particleSwarmOptimisation.particleSwarmOptimisation as pSO
+import particleSwarmOptimisation.particleSwarmOptimisation as pSO
 import antColonyOptimisation.antColonyOptimisation as aCO
 from data import get_data
+
+import argparse
 
 random.seed(2009)
 
@@ -19,10 +21,46 @@ tasks, employees = get_data('taskdata.csv', 'employeedata.csv')
 N = 5
 
 # start benchmark
-gA.geneticAlgorithm(tasks, employees, N)
+def benchmark_ga(tasks, employees):
+    # Start timer
+    gA.geneticAlgorithm(tasks, employees, N)
+    # Print results
+    # Stop timer
+
+def benchmark_pso(tasks, employees):
+    # Start timer
+    result, score = pSO.particle_swarm_optimisation(tasks, employees)
+    print(f"{result} ({score})")
+    # Print results
+    # Stop timer
+
+def benchmark_aco(tasks, employees):
+    # Start timer
+    pass
+    # Print results
+    # Stop timer
 # stop benchmark
 
-# result, score = pSO.particle_swarm_optimisation(tasks, employees)
-# print(f"{result} ({score})")
 
 # stop benchmark
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+            prog='Task Assigner',
+            description='Uses three different metaheuristic algorithms to assign tasks to employees')
+    parser.add_argument('algorithm', default='all', choices=['all', 'ga', 'pso', 'aco'], nargs='?')
+    parser.add_argument('task_data')
+    parser.add_argument('employee_data')
+    args = parser.parse_args()
+
+    tasks, employees = get_data(args.task_data, args.employee_data)
+    if args.algorithm == 'all':
+        benchmark_ga(tasks, employees)
+        benchmark_pso(tasks, employees)
+        benchmark_aco(tasks, employees)
+    elif args.algorithm == 'ga':
+        benchmark_ga(tasks, employees)
+    elif args.algorithm == 'pso':
+        benchmark_pso(tasks, employees)
+    elif args.algorithm == 'aco':
+        benchmark_aco(tasks, employees)
