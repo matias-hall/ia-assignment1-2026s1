@@ -51,10 +51,10 @@ def generateCandidates(tasks, employees, N, flawed=False):
     for i in range(len(candidates)):
         candidates[i] = update_time_spent(candidates[i], employees)
     
-    printPairs(candidates)
+    #printPairs(candidates)
 
-    for candidate in candidates:
-        print(calculateTotalPenalty(candidate))
+    #for candidate in candidates:
+        #print(calculateTotalPenalty(candidate))
 
     return candidates
 
