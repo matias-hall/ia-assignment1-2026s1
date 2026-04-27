@@ -47,17 +47,37 @@ def _pso_algorithm(population: list[Particle], termination_condition: Callable[[
 
     return global_best
 
-def _converge(population):
-    positions = map(lambda particle: particle.position, population)
+# Returns a function that checks whether the solution has converged
+# or whether *threshold* iterations have passed.
+def _converge_or_threshold(threshold):
+    counter = threshold
+    def _converge(population):
+        nonlocal counter
+        counter -= 1
+        if counter <= 0:
+            return True
 
-    first = next(positions)
-    for p in positions:
-        # If any spots in the array differ, then it hasn't converged yet
-        if np.any(p != first):
-            return False
-    return True
+        positions = map(lambda particle: particle.position, population)
 
-def particle_swarm_optimisation(tasks, employees, swarm_size=15, **params):
+        first = next(positions)
+        for p in positions:
+            # If any spots in the array differ, then it hasn't converged yet
+            if np.any(p != first):
+                return False
+        return True
+    return _converge
+
+# Particle swarm optimisation algorithm:
+# *tasks* is list of tasks
+# *employees* is list of employees
+# *swarm_size* is the number of particles to run, default is 15
+# *max_iterations* is the maximum number of iterations to run before returning, default is 100
+# Additional parameters passed to internal pso algorithm:
+# *w* is the inertia, default 0.5
+# *c1* is the personal influence learning factor, default 1.5
+# *c2* is the social influence learning factor, default 1.5
+# Returns the best assignment found and its score.
+def particle_swarm_optimisation(tasks: list[task], employees: list[employee], swarm_size: int=15, max_iterations: int=100, **params) -> (list[int], float):
     evaluator = Evaluator(tasks, employees)
     population = []
     for i in range(swarm_size):
@@ -69,9 +89,6 @@ def particle_swarm_optimisation(tasks, employees, swarm_size=15, **params):
         for i in range(10):
             velocity.append(random.uniform(-2.0, 2.0))
         population.append(Particle(assignment, velocity, evaluator.evaluate_assignment))
-    result = _pso_algorithm(population, _converge, **params)
+
+    result = _pso_algorithm(population, _converge_or_threshold(max_iterations), **params)
     return result, evaluator.evaluate_assignment(result)
-
-
-
-
