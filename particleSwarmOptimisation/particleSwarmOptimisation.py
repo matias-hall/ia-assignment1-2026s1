@@ -8,13 +8,13 @@ class Particle():
         self.position = np.array(position, dtype='i8')
         self.velocity = np.array(velocity, dtype='f8')
         self.evaluator = evaluator
-        self.best = position
-        self.best_score = evaluator(position)
+        self.best = self.position
+        self.best_score = evaluator(self.position)
 
     # Update its position and reevaluate its personal best
     def tick(self):
-        self.position = np.clip((self.position + self.velocity).astype(np.int32), 1, 5)
-        print(self.position)
+        self.position = (self.position + self.velocity).astype(np.int32)
+        self.position = np.mod((self.position - 1), 5) + 1
 
         new_score = self.evaluator(self.position)
         if self.best_score > new_score:
@@ -28,7 +28,7 @@ class Particle():
                          + random.uniform(0, c2) * (global_best - self.position))
 
 
-def _pso_algorithm(population: list[Particle], termination_condition: Callable[[list[Particle]], bool], **params) -> Assignment:
+def _pso_algorithm(population: list[Particle], termination_condition: Callable[[list[Particle]], bool], iteration_hook, **params) -> Assignment:
     # Set parameters, with defaults if not given
     w = params.get('w', 0.5)
     c1 = params.get('c1', 1.5)
@@ -41,9 +41,11 @@ def _pso_algorithm(population: list[Particle], termination_condition: Callable[[
         for individual in population:
             individual.update_velocity(w, c1, c2, global_best)
             individual.tick()
-            print(f"Personal best: {individual.best} ({individual.best_score})")
         # Obtain the new global best
         global_best = min(population, key=lambda x: x.best_score).best
+
+        if iteration_hook:
+            iteration_hook(global_best, min(population, key=lambda x: x.best_score).best_score)
 
     return global_best
 
@@ -70,14 +72,17 @@ def _converge_or_threshold(threshold):
 # Particle swarm optimisation algorithm:
 # *tasks* is list of tasks
 # *employees* is list of employees
+# Additional parameters passed used in internal pso algorithm:
 # *swarm_size* is the number of particles to run, default is 15
 # *max_iterations* is the maximum number of iterations to run before returning, default is 100
-# Additional parameters passed to internal pso algorithm:
 # *w* is the inertia, default 0.5
 # *c1* is the personal influence learning factor, default 1.5
 # *c2* is the social influence learning factor, default 1.5
 # Returns the best assignment found and its score.
-def particle_swarm_optimisation(tasks: list[task], employees: list[employee], swarm_size: int=15, max_iterations: int=100, **params) -> (list[int], float):
+def particle_swarm_optimisation(tasks: list[task], employees: list[employee], iteration_hook=None, **params) -> (list[int], float):
+    swarm_size = params.get('swarm_size', 15)
+    max_iterations = params.get('max_iterations', 100)
+
     evaluator = Evaluator(tasks, employees)
     population = []
     for i in range(swarm_size):
@@ -90,5 +95,5 @@ def particle_swarm_optimisation(tasks: list[task], employees: list[employee], sw
             velocity.append(random.uniform(-2.0, 2.0))
         population.append(Particle(assignment, velocity, evaluator.evaluate_assignment))
 
-    result = _pso_algorithm(population, _converge_or_threshold(max_iterations), **params)
+    result = _pso_algorithm(population, _converge_or_threshold(max_iterations), iteration_hook, **params)
     return result, evaluator.evaluate_assignment(result)
