@@ -33,7 +33,6 @@ def generateCandidates(tasks, employees, N, flawed=False):
                 assignedEmployee = random.choice(availableEmployees)
                 task_counts[assignedEmployee.ID] += 1
 
-                # Track locally—don't modify employee object
                 time_spent = assignedEmployee.availableHours - remaining_hours[assignedEmployee.ID]
                 remaining_hours[assignedEmployee.ID] -= task.estTime
 

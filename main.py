@@ -22,17 +22,28 @@ N = 5
 
 # start benchmark
 def benchmark_ga(tasks, employees):
-    # Start timer
-    gA.geneticAlgorithm(tasks, employees, N)
-    # Print results
-    # Stop timer
+    start = time.perf_counter()
+
+    maxGenerations = 100
+    crossoverRate = 0.7
+    mutationRate = 0.01
+
+    gA.geneticAlgorithm(tasks, employees, N, maxGenerations, crossoverRate, mutationRate)
+    end = time.perf_counter()
+
+    runtime = end - start
+    print("Total runtime is: ", runtime)
 
 def benchmark_pso(tasks, employees):
-    # Start timer
+    start = time.perf_counter()
     result, score = pSO.particle_swarm_optimisation(tasks, employees)
+    
     print(f"{result} ({score})")
     # Print results
-    # Stop timer
+    end = time.perf_counter()
+
+    runtime = end - start
+    print("Total runtime is: ", runtime)
 
 def benchmark_aco(tasks, employees):
     start = time.perf_counter()
