@@ -36,13 +36,12 @@ def benchmark_pso(tasks, employees):
 
 def benchmark_aco(tasks, employees):
     # Start timer
-    ants = 30, Q = 1, maxIt = 500
+    ants = 30 
+    Q = 1
+    maxIt = 500
     evapRate = 0.3
-    solution, bestFitness = aco.ant_colony_optimization(ants, evapRate, Q, maxIt, tasks, employees) 
-    print("\nBest solution:", solution)
-    print("Best fitness:", bestFitness)
-    print("\nGraph:")
-    aco.print_board(best_solution)
+    aCO.ant_colony_optimization(ants, evapRate, Q, maxIt, tasks, employees) 
+    # prints results inside the function
     # Stop timer
 # stop benchmark
 
