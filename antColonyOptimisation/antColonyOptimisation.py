@@ -12,29 +12,28 @@ def skill_mismatch_penalty(taskSkill, empSkills):
     return penalty
 
 #overload for one specific employee
-def employee_overload(employee, emp_data, solution):
+def employee_overload(emp_id, emps, solution, tasks):
     totalTime = 0
     overload = 0
     for task in range(t):
-        if solution[task] == employee:
-            totalTime += task_data[task][0]
+        if solution[task] == emp_id:
+            totalTime += tasks[task].estTime
     # work out hours overworked for each employee
-    if(totalTime > emp_data[employee][0]):
-        overload = overload + (totalTime - emp_data[employee][0])
+    if(totalTime > emps[emp_id].availableHours):
+        overload = overload + (totalTime - emps[emp_id].availableHours)
 
     return overload
 
-# deadline penalty as described in assignment specifications
-def deadline_penalty(task_data, emp_data, emp, solution):
+# deadline penalty function as defined in assignment sheet
+def deadline_penalty(tasks, emp_id, solution):
     deadline = []
     finishTime = 0
     penalty = 0
 
     for task in range(t):
-        if solution[task] == emp:
-            deadline.append([task, task_data[task][0], task_data[task][2]])
-
-    # sort tasks by ascending processing time
+        if solution[task] == emp_id:
+            deadline.append([task, tasks[task].estTime, tasks[task].deadline])
+    
     deadline = sorted(deadline, key = lambda x: x[1])
     
     for task in deadline:
@@ -43,7 +42,7 @@ def deadline_penalty(task_data, emp_data, emp, solution):
 
     return penalty
 
-def calculate_fitness(solution, task_data, emp_data):
+def calculate_fitness(solution, tasks, employees, violations):
     """
     Fitness = minimise cost function
     Best fitness = 0
@@ -51,38 +50,43 @@ def calculate_fitness(solution, task_data, emp_data):
     
     cost = 0 # cost = fitness
 
-    # employee penalties
-    for emp in emp_data:
-        overload = employee_overload(emp, emp_data, solution)
-        deadlineViol = deadline_penalty(task_data, emp_data, emp, solution)
+    # employee penalties overload and deadline, done seperate to tasks (as to get all of an employees assigned tasks)
+    for emp_id in range(e):
+        overload = employee_overload(emp_id, employees, solution, tasks)
+        if overload != 0:
+            violations += 1
+        deadlineViol = deadline_penalty(tasks, emp_id, solution)
+        if deadlineViol != 0:
+            violations += 1
 
         cost += 0.2 * overload + 0.2 * deadlineViol
 
 
-    # for each task, get fitness
+    # for each task, get penalties of skill and difficulty
     for task in range(t):
         
         uniqAssignViol = 0 # automatically assigned in solution
         diffViol = 0
 
-        skillMismatch = skill_mismatch_penalty(task_data[task][3], emp_data[solution[task]][2])
+        skillMismatch = skill_mismatch_penalty(tasks[task].requiredSkill, employees[solution[task]].skills)
+        if skillMismatch != 0:
+            violations += 1
 
         # difficulty level
-        if task_data[task][1] > emp_data[solution[task]][1]:
+        if tasks[task].difficulty > employees[solution[task]].skillLevel:
             diffViol += 10
+            violations += 1
 
         # cost function to minimise
         cost += 0.2 * skillMismatch + 0.2 * diffViol + 0.2 * uniqAssignViol
         
 
-    return cost
-
+    return cost, violations
 
 def construct_solution(pheromone):
     """
-    Build one solution row by row. 
+    Build one solution row by row.
     For each row, choose a column based on pheromone values.
-    Each row is a task and each column is an employee
     """
     solution = [] # each row (out of 10 indices) is a task and each column is an employee assignment (employee ID)
 
@@ -100,6 +104,7 @@ def construct_solution(pheromone):
         cumulative = 0
         chosen_col = 0
 
+        # use cumulative probability
         for col in range(e):
             cumulative += pheromone[row][col]
             if cumulative >= r:
@@ -125,7 +130,7 @@ def update_pheromone(pheromone, solutions, fitnesses, evaporation_rate, Q):
 
     # Step 2: Deposit
     for solution, fitness in zip(solutions, fitnesses):
-        # Better fitness gives larger pheromone deposit
+        # Better fitness gives larger pheromone deposit. highest reward is 1 (if Q = 1), for a minimisation function
         deposit_amount = Q / (1 + fitness)
 
         for row, col in enumerate(solution):
@@ -146,8 +151,7 @@ def print_board(solution):
                 line.append(".")
         print(" ".join(line))
 
-
-def ant_colony_optimization(num_ants, evaporation_rate, Q, max_iterations, task_data, emp_data):
+def ant_colony_optimization(num_ants, evaporation_rate, Q, max_iterations, tasks, employees):
     """
     Main ACO process:
     - initialize pheromone
@@ -162,6 +166,7 @@ def ant_colony_optimization(num_ants, evaporation_rate, Q, max_iterations, task_
     
     best_solution = None
     best_fitness = float("inf")
+    violations = 0
 
     for iteration in range(max_iterations):
         solutions = []
@@ -170,8 +175,9 @@ def ant_colony_optimization(num_ants, evaporation_rate, Q, max_iterations, task_
         # Each ant builds one solution
         for _ in range(num_ants):
             solution = construct_solution(pheromone)
-            fitness = calculate_fitness(solution, task_data, emp_data)
+            fitness, v = calculate_fitness(solution, tasks, employees, 0)
 
+            violations += v
             solutions.append(solution)
             fitnesses.append(fitness)
 
@@ -183,47 +189,16 @@ def ant_colony_optimization(num_ants, evaporation_rate, Q, max_iterations, task_
         # Update pheromone after all ants finish
         update_pheromone(pheromone, solutions, fitnesses, evaporation_rate, Q)
 
-        #print(f"Iteration {iteration + 1}: Best fitness so far = {best_fitness:.1f}")
+        print(f"Iteration {iteration + 1}: Best fitness so far = {best_fitness:.1f} Num of Violations: {violations}")
 
         # Stop early if perfect solution is found
         if best_fitness == 0:
             break
 
+
+    print("\nBest solution:", best_solution)
+    print("Best fitness:", best_fitness)
+    print("\nGraph:")
+    print_board(best_solution)
+
     return best_solution, best_fitness
-
-
-
-
-# Task ID : [est time(hrs),difficulty,deadline(hrs from now),required skill]
-task_data = {
-    0 : [4, 3, 8, "A"],
-    1 : [6, 5, 12, "B"],
-    2 : [2, 2, 6, "A"],
-    3 : [5, 4, 10, "C"],
-    4 : [3, 1, 7, "A"],
-    5 : [8, 6, 15, "B"],
-    6 : [4, 3, 9, "C"],
-    7 : [7, 5, 14, "B"],
-    8 : [2, 2, 5, "A"],
-    9 : [6, 4, 11, "C"]
-}
-
-# Employee (Emp) ID : [available hours,skill level,skills]
-emp_data = {
-    0 : [10, 4, ["A", "C"]],
-    1 : [12, 6, ["A", "B", "C"]],
-    2 : [8, 3, ["A"]],
-    3 : [15, 7, ["B", "C"]],
-    4 : [9, 5, ["A", "C"]]
-}
-
-# Run the ACO algorithm
-best_solution, best_fitness = ant_colony_optimization(30, 0.3, 1, 500, task_data, emp_data)
-    
-    
-
-
-print("\nBest solution:", best_solution)
-print("Best fitness:", best_fitness)
-print("\Graph:")
-print_board(best_solution)
