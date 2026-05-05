@@ -29,6 +29,8 @@ def benchmark_ga(tasks, employees):
     mutationRate = 0.01
 
     gA.geneticAlgorithm(tasks, employees, N, maxGenerations, crossoverRate, mutationRate)
+    #gA.evaluateGA(tasks, employees, N)
+    
     end = time.perf_counter()
 
     runtime = end - start
