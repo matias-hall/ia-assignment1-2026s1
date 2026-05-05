@@ -35,14 +35,17 @@ def benchmark_pso(tasks, employees):
     # Stop timer
 
 def benchmark_aco(tasks, employees):
-    # Start timer
+    start = time.perf_counter()
     ants = 30 
     Q = 1
     maxIt = 500
     evapRate = 0.3
     aCO.ant_colony_optimization(ants, evapRate, Q, maxIt, tasks, employees) 
+    end = time.perf_counter()
+
+    runtime = end - start
+    print("Total runtime is: ", runtime)
     # prints results inside the function
-    # Stop timer
 # stop benchmark
 
 
