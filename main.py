@@ -11,8 +11,6 @@ from data import get_data
 
 import argparse
 
-random.seed(2009)
-
 tasks, employees = get_data('taskdata.csv', 'employeedata.csv')
 
 # benchmarking functions
@@ -39,8 +37,7 @@ def benchmark_ga(tasks, employees):
 
 def benchmark_pso(tasks, employees):
     start = time.perf_counter()
-    result, score = pSO.particle_swarm_optimisation(tasks, employees)
-    
+    result, score = pSO.particle_swarm_optimisation(tasks, employees, w=0.82, c1=1.4, c2=1.1, max_iterations=500)
     print(f"{result} ({score})")
     # Print results
     end = time.perf_counter()
