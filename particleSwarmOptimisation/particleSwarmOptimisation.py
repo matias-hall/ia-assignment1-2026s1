@@ -4,7 +4,7 @@ import numpy as np
 from .evaluator import Evaluator
 
 class Particle():
-    def __init__(self, position: list[int], velocity: list[float], evaluator: Callable[[Assignment], float]):
+    def __init__(self, position, velocity, evaluator):
         self.position = np.array(position, dtype='i8')
         self.velocity = np.array(velocity, dtype='f8')
         self.evaluator = evaluator
@@ -22,13 +22,13 @@ class Particle():
             self.best = self.position
 
     # Update its velocity based on parameters, global best, and its own personal best
-    def update_velocity(self, w: float, c1: float, c2: float, global_best):
+    def update_velocity(self, w, c1, c2, global_best):
         self.velocity = (w * self.velocity
                          + random.uniform(0, c1) * (self.best - self.position)
                          + random.uniform(0, c2) * (global_best - self.position))
 
 
-def _pso_algorithm(population: list[Particle], termination_condition: Callable[[list[Particle]], bool], iteration_hook, **params) -> Assignment:
+def _pso_algorithm(population, termination_condition, iteration_hook, **params):
     # Set parameters, with defaults if not given
     w = params.get('w', 0.5)
     c1 = params.get('c1', 1.5)
@@ -75,7 +75,7 @@ def _perfect_or_threshold(threshold):
 # *c1* is the personal influence learning factor, default 1.5
 # *c2* is the social influence learning factor, default 1.5
 # Returns the best assignment found and its score.
-def particle_swarm_optimisation(tasks: list[task], employees: list[employee], iteration_hook=None, **params) -> (list[int], float):
+def particle_swarm_optimisation(tasks, employees, iteration_hook=None, **params):
     swarm_size = params.get('swarm_size', 15)
     max_iterations = params.get('max_iterations', 100)
 

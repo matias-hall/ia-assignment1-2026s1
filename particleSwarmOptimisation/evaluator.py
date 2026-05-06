@@ -5,11 +5,11 @@ from classes import task, employee
 # Then, the `evaluate_assignment` method can be called with a list of assignments, which results a floating-point number representing the cost.
 # The list of assignments should be a list of T integers in the range [1,5], where T is the number of tasks. Each integer represents an employee (there are five employees)
 class Evaluator():
-    def __init__(self, tasks: list[task], employees: list[employee]):
+    def __init__(self, tasks, employees):
         self.tasks = tasks
         self.employees = employees
 
-    def evaluate_assignment(self, assignment: list[int]) -> float:
+    def evaluate_assignment(self, assignment):
         overload = 0
         for employee_index in range(len(self.employees)):
             # + 1 since employee ids are 1-indexed
