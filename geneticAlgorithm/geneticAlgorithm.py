@@ -154,7 +154,7 @@ def evaluateGAConstraints(tasks, employees, N):
 
 def evaluateGAGeneration(tasks, employees, N):
     MG = 100
-    num_trials = 5
+    num_trials = 20
     best_fitness_matrix = np.zeros((num_trials, MG))
     mean_fitness_matrix = np.zeros((num_trials, MG))
 
@@ -168,6 +168,9 @@ def evaluateGAGeneration(tasks, employees, N):
             # Optionally print progress
             # print(f"Trial {trial+1}, Generation {G}: Best Fitness: {fitness}, Mean Fitness: {meanFitness}")
 
+    best_fitness_matrix = (best_fitness_matrix - 5) * -5
+    mean_fitness_matrix = (mean_fitness_matrix - 5) * -5
+
     avg_best_fitness = np.mean(best_fitness_matrix, axis=0)
     avg_mean_fitness = np.mean(mean_fitness_matrix, axis=0)
 
@@ -179,18 +182,18 @@ def evaluateGAGeneration(tasks, employees, N):
     for trial in range(num_trials):
         plt.plot(generations, best_fitness_matrix[trial], alpha=0.3, label=f'Trial {trial+1}' if trial==0 else None)
     plt.plot(generations, avg_best_fitness, color='black', linewidth=2, label='Average')
-    plt.title('Best Candidate Fitness vs Generations')
+    plt.title('Lowest Constraint Violations vs Generations')
     plt.xlabel('Generations')
-    plt.ylabel('Best Fitness')
+    plt.ylabel('Constraint Violations')
     plt.legend()
 
     plt.subplot(1, 2, 2)
     for trial in range(num_trials):
         plt.plot(generations, mean_fitness_matrix[trial], alpha=0.3, label=f'Trial {trial+1}' if trial==0 else None)
     plt.plot(generations, avg_mean_fitness, color='black', linewidth=2, label='Average')
-    plt.title('Mean Fitness vs Generations')
+    plt.title('Minimum Constraint Violations vs Generations')
     plt.xlabel('Generations')
-    plt.ylabel('Mean Fitness')
+    plt.ylabel('Constraint Violations')
     plt.legend()
 
     plt.tight_layout()

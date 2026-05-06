@@ -96,14 +96,14 @@ def calculateTotalPenalty(candidate):
     for task, employee, timeSpent in candidate:
         if (timeSpent + task.estTime) > task.deadline:
             deadlineViolationPenalty += timeSpent + task.estTime - task.deadline
-    deadlineViolationPenalty = deadlineViolationPenalty * 0.2  # weight deadline penalty more heavily
+    deadlineViolationPenalty = deadlineViolationPenalty * 0.2
 
     # unique assignment violation penalty
     uniqueAssignmentViolationPenalty = 0
     seen_tasks = set()
     for task, employee, timeSpent in candidate:
         if task.ID in seen_tasks:
-            uniqueAssignmentViolationPenalty += 0.2  # duplicate assignment
+            uniqueAssignmentViolationPenalty += 0.2
         else:
             seen_tasks.add(task.ID)
 
