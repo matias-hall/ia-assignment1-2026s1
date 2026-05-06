@@ -49,25 +49,21 @@ def _pso_algorithm(population: list[Particle], termination_condition: Callable[[
 
     return global_best
 
-# Returns a function that checks whether the solution has converged
+# Returns a function that checks whether a perfect solution has been found
 # or whether *threshold* iterations have passed.
-def _converge_or_threshold(threshold):
+def _perfect_or_threshold(threshold):
     counter = threshold
-    def _converge(population):
+    def _check(population):
         nonlocal counter
         counter -= 1
         if counter <= 0:
             return True
 
-        positions = map(lambda particle: particle.position, population)
-
-        first = next(positions)
-        for p in positions:
-            # If any spots in the array differ, then it hasn't converged yet
-            if np.any(p != first):
-                return False
-        return True
-    return _converge
+        best_score = min(population, key=lambda x: x.best_score).best_score
+        if best_score < 0.0001:
+            return True
+        return False
+    return _check
 
 # Particle swarm optimisation algorithm:
 # *tasks* is list of tasks
@@ -95,5 +91,5 @@ def particle_swarm_optimisation(tasks: list[task], employees: list[employee], it
             velocity.append(random.uniform(-2.0, 2.0))
         population.append(Particle(assignment, velocity, evaluator.evaluate_assignment))
 
-    result = _pso_algorithm(population, _converge_or_threshold(max_iterations), iteration_hook, **params)
+    result = _pso_algorithm(population, _perfect_or_threshold(max_iterations), iteration_hook, **params)
     return result, evaluator.evaluate_assignment(result)
