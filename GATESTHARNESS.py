@@ -1,8 +1,5 @@
-# import modules from subfolders and benchmarking.py
 import classes
-import functions
 import random
-import benchmarking
 import geneticAlgorithm.geneticAlgorithm as gA
 #import particleSwarmOptimisation.particleSwarmOptimisation as pSO
 #import antColonyOptimisation.antColonyOptimisation as aCO
@@ -42,7 +39,7 @@ for line in taskdata.strip().split("\n"):
 
 for line in employeeData.strip().split("\n"):
     ID, availableHours, skillLevel, skills = line.split(",")
-    employee = classes.employee(ID, int(availableHours), int(skillLevel), list(skills))  # setting remainingHours to availableHours
+    employee = classes.employee(ID, int(availableHours), int(skillLevel), list(skills))
     employees.append(employee)  # add employee to the list
 
 # benchmarking functions
@@ -57,11 +54,8 @@ maxGenerations = 100
 crossoverRate = 0.7
 mutationRate = 0.01
 
-#gA.geneticAlgorithm(tasks, employees, N, maxGenerations, crossoverRate, mutationRate)
+gA.geneticAlgorithm(tasks, employees, N, maxGenerations, crossoverRate, mutationRate)
 
-#gA.evaluateGAConstraints(tasks, employees, N)
-#gA.evaluateGAGeneration(tasks, employees, N)
-#gA.evaluateGARuntime(tasks, employees, N)
-
-#gA.evaluateGARuntime(tasks, employees, N)
+gA.evaluateGAConstraints(tasks, employees, N)
 gA.evaluateGAGeneration(tasks, employees, N)
+gA.evaluateGARuntime(tasks, employees, N)

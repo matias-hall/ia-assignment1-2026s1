@@ -133,6 +133,8 @@ def update_time_spent(candidate, employees):
     emp_hours = {emp.ID: emp.availableHours for emp in employees}
     spent_so_far = {emp.ID: 0 for emp in employees}
     updated_assignments = []
+
+    # iterating through the candidate and updating time spent based on the order of tasks
     for assignment in candidate:
         if not (isinstance(assignment, tuple) and len(assignment) == 3):
             continue
@@ -143,4 +145,5 @@ def update_time_spent(candidate, employees):
     return updated_assignments
 
 def sortTasks(candidate):
+    # this always leads to the same order of tasks
     return sorted(candidate, key=lambda x: (x[0].estTime, x[0].deadline))

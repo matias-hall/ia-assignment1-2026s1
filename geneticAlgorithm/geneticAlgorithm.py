@@ -38,7 +38,6 @@ def geneticAlgorithm(tasks, employees, N, maxGenerations, crossoverRate, mutatio
     return bestCandidate
 
 def crossover(parent1, parent2):
-    #crossoverPoint = random.randrange(1, len(parent1) - 1)  # select a random crossover point
     crossoverPoint = random.randrange(0, len(parent1))  # select a random crossover point
 
     offspring1 = []
@@ -57,14 +56,13 @@ def crossover(parent1, parent2):
 def mutate(candidate, mutationRate):
     for i in range(len(candidate)):
         if random.random() < mutationRate:
-            # Swap the assigned employees between two tasks, keeping task order
+            # swapping candidates
             swapIndex = random.randint(0, len(candidate) - 1)
             if i != swapIndex:
                 t1, e1, ts1 = candidate[i]
                 t2, e2, ts2 = candidate[swapIndex]
                 candidate[i] = (t1, e2, ts1)
                 candidate[swapIndex] = (t2, e1, ts2)
-    #print("Mutated Candidate:", candidate)
     return candidate
 
 def EvaluateFitness(candidate):
@@ -132,7 +130,7 @@ def evaluateGAConstraints(tasks, employees, N):
             mean_fitness_matrix[i, j] = avg_mean_fitness
             print(f"Averages for CR={CR:.3f}, MR={MR:.3f}: Best Fitness={avg_best_fitness}, Mean Fitness={avg_mean_fitness}\n")
 
-    # Plot heatmaps
+    # heatmaps
     fig, axs = plt.subplots(1, 2, figsize=(16, 6))
 
     im1 = axs[0].imshow(best_fitness_matrix, aspect='auto', origin='lower',
@@ -166,14 +164,11 @@ def evaluateGAGeneration(tasks, employees, N):
             fitness = EvaluateFitness(bestCandidate)
             best_fitness_matrix[trial, G-1] = fitness
             mean_fitness_matrix[trial, G-1] = meanFitness
-            # Optionally print progress
-            # print(f"Trial {trial+1}, Generation {G}: Best Fitness: {fitness}, Mean Fitness: {meanFitness}")
 
 
     avg_best_fitness = np.mean(best_fitness_matrix, axis=0)
     avg_mean_fitness = np.mean(mean_fitness_matrix, axis=0)
 
-    # Plotting
     generations = np.arange(1, MG+1)
     plt.figure(figsize=(14, 6))
 
@@ -198,13 +193,14 @@ def evaluateGAGeneration(tasks, employees, N):
     plt.tight_layout()
     plt.show()
 
+    # converting from fitness score to constraint violations
     best_fitness_matrix = (best_fitness_matrix - 5) * -num_trials
     mean_fitness_matrix = (mean_fitness_matrix - 5) * -num_trials
 
     avg_best_fitness = np.mean(best_fitness_matrix, axis=0)
     avg_mean_fitness = np.mean(mean_fitness_matrix, axis=0)
 
-    # Plotting
+    # plotting
     generations = np.arange(1, MG+1)
     plt.figure(figsize=(14, 6))
 
@@ -232,8 +228,9 @@ def evaluateGAGeneration(tasks, employees, N):
 
 def evaluateGARuntime(tasks, employees, N):
     MG = 100
-    num_trials = 5
+    num_trials = 20
     runtime_matrix = np.zeros((num_trials, MG))
+    halted_generations = np.full(num_trials, MG)
 
     for trial in range(num_trials):
         print(f"Starting Trial {trial+1}")
@@ -242,18 +239,32 @@ def evaluateGARuntime(tasks, employees, N):
             bestCandidate, meanFitness = geneticAlgorithm(tasks, employees, N, maxGenerations=G, crossoverRate=0.7, mutationRate=0.01, return_mean_fitness=True)
             end_time = time.perf_counter()
             runtime_matrix[trial, G-1] = end_time - start_time
+            # halting implementation
+            fitness = EvaluateFitness(bestCandidate)
+            if fitness == 5:
+                print(f"Halting trial {trial+1} at generation {G} (fitness=5)")
+                halted_generations[trial] = G
+                break
 
-    avg_runtime_per_generation = np.mean(runtime_matrix, axis=0)
+    # remove values after halting
+    masked_runtime_matrix = np.full_like(runtime_matrix, np.nan)
+    for trial in range(num_trials):
+        halt_gen = halted_generations[trial]
+        masked_runtime_matrix[trial, :halt_gen] = runtime_matrix[trial, :halt_gen]
+    avg_runtime_per_generation = np.nanmean(masked_runtime_matrix, axis=0)
     generations = np.arange(1, MG+1)
     plt.figure(figsize=(10, 6))
     for trial in range(num_trials):
         plt.plot(generations, runtime_matrix[trial], alpha=0.3, label=f'Trial {trial+1}' if trial==0 else None)
+        halt_gen = halted_generations[trial]
+        if halt_gen < MG:
+            plt.axvline(x=halt_gen, color='red', linestyle='--', alpha=0.5)
     plt.plot(generations, avg_runtime_per_generation, color='black', linewidth=2, label='Average')
     plt.xlabel('Generations')
     plt.ylabel('Runtime (seconds)')
-    plt.title('Runtime per Generation')
+    plt.title('Runtime per Generation (Halts if fitness=5)')
     plt.legend()
     plt.tight_layout()
     plt.show()
-    avg_runtime = np.mean(runtime_matrix[:, -1])
-    print(f"Average runtime for {MG} generations over {num_trials} trials: {avg_runtime:.4f} seconds")
+    avg_runtime = np.nanmean([runtime_matrix[trial, halted_generations[trial]-1] for trial in range(num_trials)])
+    print(f"Average runtime for halting generation over {num_trials} trials: {avg_runtime:.4f} seconds")
