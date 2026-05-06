@@ -59,7 +59,9 @@ mutationRate = 0.01
 
 #gA.geneticAlgorithm(tasks, employees, N, maxGenerations, crossoverRate, mutationRate)
 
-gA.evaluateGAConstraints(tasks, employees, N)
+#gA.evaluateGAConstraints(tasks, employees, N)
+#gA.evaluateGAGeneration(tasks, employees, N)
+#gA.evaluateGARuntime(tasks, employees, N)
+
+#gA.evaluateGARuntime(tasks, employees, N)
 gA.evaluateGAGeneration(tasks, employees, N)
-gA.evaluateGACompute(tasks, employees, N)
-gA.evaluateGARuntime(tasks, employees, N)

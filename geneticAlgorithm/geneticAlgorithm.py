@@ -4,6 +4,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import tracemalloc
+import time
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import candidateGeneration as cG
 
@@ -153,7 +154,7 @@ def evaluateGAConstraints(tasks, employees, N):
     return
 
 def evaluateGAGeneration(tasks, employees, N):
-    MG = 100
+    MG = 500
     num_trials = 5
     best_fitness_matrix = np.zeros((num_trials, MG))
     mean_fitness_matrix = np.zeros((num_trials, MG))
@@ -229,38 +230,30 @@ def evaluateGAGeneration(tasks, employees, N):
     plt.show()
     return
 
-def evaluateGACompute(tasks, employees, N):
-    MG = 500
-    num_trials = 5
-    memory_usage = []
-
-    for trial in range(num_trials):
-        trial_memory = []
-        for G in range(1, MG+1):
-            tracemalloc.start()
-            bestCandidate, meanFitness = geneticAlgorithm(tasks, employees, N, maxGenerations=G, crossoverRate=0.7, mutationRate=0.01, return_mean_fitness=True)
-            current, peak = tracemalloc.get_traced_memory()
-            trial_memory.append(peak / 1024)  # in KB
-            tracemalloc.stop()
-        memory_usage.append(trial_memory)
-
-    avg_memory = [sum(mem)/num_trials for mem in zip(*memory_usage)]
-    plt.plot(range(1, MG+1), avg_memory)
-    plt.xlabel('Generations')
-    plt.ylabel('Peak Memory Usage (KB)')
-    plt.title('Average Peak Memory Usage per Generation')
-    plt.show()
-
 def evaluateGARuntime(tasks, employees, N):
     MG = 100
-    num_trials = 20
-    runtimes = []
+    num_trials = 5
+    runtime_matrix = np.zeros((num_trials, MG))
 
     for trial in range(num_trials):
-        start_time = time.perf_counter()
-        bestCandidate, meanFitness = geneticAlgorithm(tasks, employees, N, maxGenerations=MG, crossoverRate=0.7, mutationRate=0.01, return_mean_fitness=True)
-        end_time = time.perf_counter()
-        runtimes.append(end_time - start_time)
+        print(f"Starting Trial {trial+1}")
+        for G in range(1, MG+1):
+            start_time = time.perf_counter()
+            bestCandidate, meanFitness = geneticAlgorithm(tasks, employees, N, maxGenerations=G, crossoverRate=0.7, mutationRate=0.01, return_mean_fitness=True)
+            end_time = time.perf_counter()
+            runtime_matrix[trial, G-1] = end_time - start_time
 
-    avg_runtime = sum(runtimes) / num_trials
-    print(f"Average runtime over {num_trials} trials: {avg_runtime:.4f} seconds")
+    avg_runtime_per_generation = np.mean(runtime_matrix, axis=0)
+    generations = np.arange(1, MG+1)
+    plt.figure(figsize=(10, 6))
+    for trial in range(num_trials):
+        plt.plot(generations, runtime_matrix[trial], alpha=0.3, label=f'Trial {trial+1}' if trial==0 else None)
+    plt.plot(generations, avg_runtime_per_generation, color='black', linewidth=2, label='Average')
+    plt.xlabel('Generations')
+    plt.ylabel('Runtime (seconds)')
+    plt.title('Runtime per Generation')
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
+    avg_runtime = np.mean(runtime_matrix[:, -1])
+    print(f"Average runtime for {MG} generations over {num_trials} trials: {avg_runtime:.4f} seconds")

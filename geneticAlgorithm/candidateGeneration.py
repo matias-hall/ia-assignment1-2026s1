@@ -41,19 +41,12 @@ def generateCandidates(tasks, employees, N, flawed=False):
         if len(assignments) == len(tasks):
             candidates.append(assignments)
 
-    #printPairs(candidates)
-
     for i in range(len(candidates)):
         candidates[i] = sortTasks(candidates[i])
 
 
     for i in range(len(candidates)):
         candidates[i] = update_time_spent(candidates[i], employees)
-    
-    #printPairs(candidates)
-
-    #for candidate in candidates:
-        #print(calculateTotalPenalty(candidate))
 
     return candidates
 
