@@ -1,7 +1,5 @@
 import random
 
-random.seed(2009)
-
 # generate N candidate solutions
 def generateCandidates(tasks, employees, N, flawed=False):
     candidates = []

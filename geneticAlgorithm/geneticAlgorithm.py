@@ -8,8 +8,6 @@ import time
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import candidateGeneration as cG
 
-random.seed(2009)
-
 def geneticAlgorithm(tasks, employees, N, maxGenerations, crossoverRate, mutationRate, return_mean_fitness=False):
     candidates = cG.generateCandidates(tasks, employees, N, flawed=True)
     totalFitness = computeTotalFitness(candidates)
