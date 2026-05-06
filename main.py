@@ -3,6 +3,7 @@ import classes
 import functions
 import random
 import benchmarking
+import time
 import geneticAlgorithm.geneticAlgorithm as gA
 import particleSwarmOptimisation.particleSwarmOptimisation as pSO
 import antColonyOptimisation.antColonyOptimisation as aCO
