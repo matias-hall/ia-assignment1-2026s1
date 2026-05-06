@@ -166,11 +166,14 @@ def ant_colony_optimization(num_ants, evaporation_rate, Q, max_iterations, tasks
     
     best_solution = None
     best_fitness = float("inf")
-    violations = 0
+
+    
 
     for iteration in range(max_iterations):
+        violations = 0
         solutions = []
         fitnesses = []
+        
 
         # Each ant builds one solution
         for _ in range(num_ants):
@@ -189,8 +192,8 @@ def ant_colony_optimization(num_ants, evaporation_rate, Q, max_iterations, tasks
         # Update pheromone after all ants finish
         update_pheromone(pheromone, solutions, fitnesses, evaporation_rate, Q)
 
-        print(f"Iteration {iteration + 1}: Best fitness so far = {best_fitness:.1f} Num of Violations: {violations}")
-
+        print(f"Iteration {iteration + 1}: Best fitness so far = {best_fitness:.3f}, Num of Violations in this iteration: {violations}")
+        
         # Stop early if perfect solution is found
         if best_fitness == 0:
             break
