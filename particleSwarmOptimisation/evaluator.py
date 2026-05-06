@@ -1,3 +1,5 @@
+from classes import task, employee
+
 # Class for evaluating a given assignment.
 # First, it is loaded with a list of tasks and employees
 # Then, the `evaluate_assignment` method can be called with a list of assignments, which results a floating-point number representing the cost.
