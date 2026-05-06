@@ -1,9 +1,9 @@
-
 import random
 import sys
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+import tracemalloc
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import candidateGeneration as cG
 
@@ -103,13 +103,13 @@ def GetBestIndividual(candidates):
 def evaluateGAConstraints(tasks, employees, N):
     minCR = 0.5
     maxCR = 0.9
-    CRinterval = (maxCR - minCR) / 20
+    CRinterval = (maxCR - minCR) / 10
     minMR = 0.005
     maxMR = 0.1
-    MRinterval = (maxMR - minMR) / 20
+    MRinterval = (maxMR - minMR) / 10
 
-    CR_values = [minCR + i * CRinterval for i in range(21)]
-    MR_values = [minMR + i * MRinterval for i in range(21)]
+    CR_values = [minCR + i * CRinterval for i in range(11)]
+    MR_values = [minMR + i * MRinterval for i in range(11)]
     best_fitness_matrix = np.zeros((len(CR_values), len(MR_values)))
     mean_fitness_matrix = np.zeros((len(CR_values), len(MR_values)))
     num_trials = 5
@@ -154,7 +154,7 @@ def evaluateGAConstraints(tasks, employees, N):
 
 def evaluateGAGeneration(tasks, employees, N):
     MG = 100
-    num_trials = 20
+    num_trials = 5
     best_fitness_matrix = np.zeros((num_trials, MG))
     mean_fitness_matrix = np.zeros((num_trials, MG))
 
@@ -168,8 +168,37 @@ def evaluateGAGeneration(tasks, employees, N):
             # Optionally print progress
             # print(f"Trial {trial+1}, Generation {G}: Best Fitness: {fitness}, Mean Fitness: {meanFitness}")
 
-    best_fitness_matrix = (best_fitness_matrix - 5) * -5
-    mean_fitness_matrix = (mean_fitness_matrix - 5) * -5
+
+    avg_best_fitness = np.mean(best_fitness_matrix, axis=0)
+    avg_mean_fitness = np.mean(mean_fitness_matrix, axis=0)
+
+    # Plotting
+    generations = np.arange(1, MG+1)
+    plt.figure(figsize=(14, 6))
+
+    plt.subplot(1, 2, 1)
+    for trial in range(num_trials):
+        plt.plot(generations, best_fitness_matrix[trial], alpha=0.3, label=f'Trial {trial+1}' if trial==0 else None)
+    plt.plot(generations, avg_best_fitness, color='black', linewidth=2, label='Average')
+    plt.title('Best Candidate Fitness vs Generations')
+    plt.xlabel('Generations')
+    plt.ylabel('Constraint Violations')
+    plt.legend()
+
+    plt.subplot(1, 2, 2)
+    for trial in range(num_trials):
+        plt.plot(generations, mean_fitness_matrix[trial], alpha=0.3, label=f'Trial {trial+1}' if trial==0 else None)
+    plt.plot(generations, avg_mean_fitness, color='black', linewidth=2, label='Average')
+    plt.title('Mean Candidate Fitness vs Generations')
+    plt.xlabel('Generations')
+    plt.ylabel('Constraint Violations')
+    plt.legend()
+
+    plt.tight_layout()
+    plt.show()
+
+    best_fitness_matrix = (best_fitness_matrix - 5) * -num_trials
+    mean_fitness_matrix = (mean_fitness_matrix - 5) * -num_trials
 
     avg_best_fitness = np.mean(best_fitness_matrix, axis=0)
     avg_mean_fitness = np.mean(mean_fitness_matrix, axis=0)
@@ -191,7 +220,7 @@ def evaluateGAGeneration(tasks, employees, N):
     for trial in range(num_trials):
         plt.plot(generations, mean_fitness_matrix[trial], alpha=0.3, label=f'Trial {trial+1}' if trial==0 else None)
     plt.plot(generations, avg_mean_fitness, color='black', linewidth=2, label='Average')
-    plt.title('Minimum Constraint Violations vs Generations')
+    plt.title('Mean Constraint Violations vs Generations')
     plt.xlabel('Generations')
     plt.ylabel('Constraint Violations')
     plt.legend()
@@ -199,3 +228,39 @@ def evaluateGAGeneration(tasks, employees, N):
     plt.tight_layout()
     plt.show()
     return
+
+def evaluateGACompute(tasks, employees, N):
+    MG = 500
+    num_trials = 5
+    memory_usage = []
+
+    for trial in range(num_trials):
+        trial_memory = []
+        for G in range(1, MG+1):
+            tracemalloc.start()
+            bestCandidate, meanFitness = geneticAlgorithm(tasks, employees, N, maxGenerations=G, crossoverRate=0.7, mutationRate=0.01, return_mean_fitness=True)
+            current, peak = tracemalloc.get_traced_memory()
+            trial_memory.append(peak / 1024)  # in KB
+            tracemalloc.stop()
+        memory_usage.append(trial_memory)
+
+    avg_memory = [sum(mem)/num_trials for mem in zip(*memory_usage)]
+    plt.plot(range(1, MG+1), avg_memory)
+    plt.xlabel('Generations')
+    plt.ylabel('Peak Memory Usage (KB)')
+    plt.title('Average Peak Memory Usage per Generation')
+    plt.show()
+
+def evaluateGARuntime(tasks, employees, N):
+    MG = 100
+    num_trials = 20
+    runtimes = []
+
+    for trial in range(num_trials):
+        start_time = time.perf_counter()
+        bestCandidate, meanFitness = geneticAlgorithm(tasks, employees, N, maxGenerations=MG, crossoverRate=0.7, mutationRate=0.01, return_mean_fitness=True)
+        end_time = time.perf_counter()
+        runtimes.append(end_time - start_time)
+
+    avg_runtime = sum(runtimes) / num_trials
+    print(f"Average runtime over {num_trials} trials: {avg_runtime:.4f} seconds")
